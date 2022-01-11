@@ -12,6 +12,9 @@ try {
     case 'create_card_when_issue_opened':
       createCardWhenIssueOpen(apiKey, apiToken, boardId);
       break;
+    case 'create_card_when_pr_opened':
+      createCardWhenPROpen(apiKey, apiToken, boardId);
+      break;
     case 'move_card_when_pull_request_opened':
       moveCardWhenPullRequestOpen(apiKey, apiToken, boardId);
       break;
