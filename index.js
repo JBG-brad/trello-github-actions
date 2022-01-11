@@ -24,6 +24,49 @@ try {
   core.setFailed(error.message);
 }
 
+
+function createCardWhenPROpen(apiKey, apiToken, boardId) {
+  const listId = process.env['TRELLO_LIST_ID'];
+  const pr = github.context.payload.pull_request
+  const number = pr.number;
+  const title = pr.title;
+  const description = pr.body;
+  const url = pr.html_url;
+  const prLabelNames = pr.labels.map(label => label.name);
+
+  getLabelsOfBoard(apiKey, apiToken, boardId).then(function(response) {
+    const trelloLabels = response;
+    const trelloLabelIds = [];
+    prLabelNames.forEach(function(prLabelName) {
+      trelloLabels.forEach(function(trelloLabel) {
+        if (trelloLabel.name == prLabelName) {
+          trelloLabelIds.push(trelloLabel.id);
+        }
+      });
+    });
+
+    getMembersOfBoard(apiKey, apiToken, boardId).then(function(response) {
+      const members = response;
+      const memberIds = [];
+      assignees.forEach(function(assignee) {
+        members.forEach(function(member) {
+          if (member.username == assignee) {
+            memberIds.push(member.id)
+          }
+        });
+      });
+      const cardParams = {
+        number: number, title: title, description: description, url: url, memberIds: memberIds.join(), labelIds: trelloLabelIds.join()
+      }
+
+      createCard(apiKey, apiToken, listId, cardParams).then(function(response) {
+        console.dir(response);
+      });
+    });
+  });
+}
+
+
 function createCardWhenIssueOpen(apiKey, apiToken, boardId) {
   const listId = process.env['TRELLO_LIST_ID'];
   const issue = github.context.payload.issue
